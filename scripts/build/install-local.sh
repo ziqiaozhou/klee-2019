@@ -11,7 +11,7 @@ mkdir -p "${BASE}"
 DIR=$(dirname "$(readlink -f "$0" || stat -f "$0")")
 
 # Install dependencies
-"${DIR}/install-klee-deps.sh"
+#"${DIR}/install-klee-deps.sh"
 
 # Build KLEE
 "${DIR}/klee.sh"

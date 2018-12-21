@@ -105,6 +105,7 @@ namespace klee {
     /// \return True on success.
     bool mustBeTrue(const Query&, bool &result);
 
+    void* convertExpr(const Query&);
     /// mustBeFalse - Determine if the expression is provably false.
     ///
     /// This evaluates the following logical formula:

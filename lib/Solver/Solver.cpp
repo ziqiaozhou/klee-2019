@@ -48,13 +48,17 @@ bool Solver::evaluate(const Query& query, Validity &result) {
 bool Solver::mustBeTrue(const Query& query, bool &result) {
   assert(query.expr->getWidth() == Expr::Bool && "Invalid expression type!");
 
+	llvm::errs()<<"mustBeTrue";
   // Maintain invariants implementations expect.
   if (ConstantExpr *CE = dyn_cast<ConstantExpr>(query.expr)) {
     result = CE->isTrue() ? true : false;
     return true;
   }
-
+	llvm::errs()<<"compute Truth";
   return impl->computeTruth(query, result);
+}
+void* Solver::convertExpr(const Query & query){
+	return impl->convertExpr(query);
 }
 
 bool Solver::mustBeFalse(const Query& query, bool &result) {

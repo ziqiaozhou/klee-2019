@@ -13,7 +13,7 @@ add_executable(kleaver
 set(KLEE_LIBS
   kleaverSolver
 )
-
+include_directories(../../)
 target_link_libraries(kleaver ${KLEE_LIBS})
 
 install(TARGETS kleaver RUNTIME DESTINATION bin)

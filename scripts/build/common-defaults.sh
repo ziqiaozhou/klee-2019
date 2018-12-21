@@ -11,12 +11,12 @@ if [[ "${DOCKER_BUILD}x" == "1x" ]]; then
 fi
 if [[ "${KLEE_TRAVIS_BUILD}x" != "1x" ]]; then
 : "${REPOSITORY:=klee}"
-: "${LLVM_VERSION:=3.4}"
+: "${LLVM_VERSION:=3.8}"
 : "${DISABLE_ASSERTIONS:=0}"
 : "${ENABLE_DEBUG:=1}"
 : "${ENABLE_OPTIMIZED:=1}"
 : "${SOLVERS:=STP}"
-: "${STP_VERSION:=2.1.2}"
+: "${STP_VERSION:=2.3.1}"
 : "${Z3_VERSION:=4.4.1}"
 : "${METASMT_VERSION:=v4.rc1}"
 : "${METASMT_DEFAULT:=STP}"

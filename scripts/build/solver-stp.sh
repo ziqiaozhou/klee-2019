@@ -30,7 +30,7 @@ if [ "x${STP_VERSION}" != "x" ]; then
   make install
 
   # Build STP
-  git_clone_or_update git://github.com/stp/stp.git "${BASE}/stp-${STP_VERSION}" ${STP_VERSION}
+  git_clone_or_update git://github.com/ziqiaozhou/stp.git "${BASE}/stp-${STP_VERSION}" ${STP_VERSION}
   mkdir -p "${BASE}/stp-${STP_VERSION}-build"
   cd "${BASE}/stp-${STP_VERSION}-build"
 

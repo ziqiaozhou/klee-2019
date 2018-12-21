@@ -82,6 +82,8 @@ public:
                             const std::vector<const Array *> &objects,
                             std::vector<std::vector<unsigned char> > &values,
                             bool &hasSolution);
+
+  void* convertExpr(const Query&);
   SolverRunStatus getOperationStatusCode();
 };
 
@@ -322,6 +324,21 @@ runAndGetCexForked(::VC vc, STPBuilder *builder, ::VCExpr q,
     }
   }
 }
+void* STPSolverImpl::convertExpr(const Query &query){
+  runStatusCode = SOLVER_RUN_STATUS_FAILURE;
+  TimerStatIncrementer t(stats::queryTime);
+
+  vc_push(vc);
+
+  for (ConstraintManager::const_iterator it = query.constraints.begin(),
+			  ie = query.constraints.end();
+			  it != ie; ++it)
+	vc_assertFormula(vc, builder->construct(*it));
+  void* expr= (void*)builder->construct(query.expr);
+  vc_pop(vc);
+  return expr;
+}
+
 bool STPSolverImpl::computeInitialValues(
     const Query &query, const std::vector<const Array *> &objects,
     std::vector<std::vector<unsigned char> > &values, bool &hasSolution) {
@@ -329,7 +346,7 @@ bool STPSolverImpl::computeInitialValues(
   TimerStatIncrementer t(stats::queryTime);
 
   vc_push(vc);
-
+  vc_setInterfaceFlags(vc,output_CNF_flag,1);
   for (ConstraintManager::const_iterator it = query.constraints.begin(),
                                          ie = query.constraints.end();
        it != ie; ++it)

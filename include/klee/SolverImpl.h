@@ -79,6 +79,7 @@ namespace klee {
     /// \return True on success
     virtual bool computeTruth(const Query& query, bool &isValid) = 0;
 
+    virtual void * convertExpr(const Query& query) {return 0;};
     /// computeValue - Compute a feasible value for the expression.
     ///
     /// The query expression is guaranteed to be non-constant.

@@ -26,11 +26,10 @@ if [[ "$TRAVIS_OS_NAME" = "linux" ]] ; then
   KLEE_CC="${LLVM_BIN}/clang"
   KLEE_CXX="${LLVM_BIN}/clang++"
 elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-  LLVM_BIN="/usr/local/opt/llvm@${LLVM_VERSION_MAJOR}/bin"
-  LLVM_CONFIG="${LLVM_BIN}/llvm-config"
+  LLVM_CONFIG="/usr/local/bin/llvm-config-${LLVM_VERSION}"
   LLVM_BUILD_DIR="$(${LLVM_CONFIG} --src-root)"
-  KLEE_CC="${LLVM_BIN}/clang"
-  KLEE_CXX="${LLVM_BIN}/clang++"
+  KLEE_CC="/usr/local/bin/clang-${LLVM_VERSION}"
+  KLEE_CXX="/usr/local/bin/clang++-${LLVM_VERSION}"
 else
   echo "Unhandled TRAVIS_OS_NAME \"${TRAVIS_OS_NAME}\""
   exit 1
@@ -64,7 +63,8 @@ for solver in ${SOLVER_LIST}; do
   echo "Setting CMake configuration option for ${solver}"
   case ${solver} in
   STP)
-    KLEE_STP_CONFIGURE_OPTION=(-DENABLE_SOLVER_STP=TRUE -DSTP_DIR="${BASE}/stp-${STP_VERSION}-install")
+   # KLEE_STP_CONFIGURE_OPTION=(-DENABLE_SOLVER_STP=TRUE -DSTP_DIR="${BASE}/stp-${STP_VERSION}-install")
+   KLEE_STP_CONFIGURE_OPTION=(-DENABLE_SOLVER_STP=TRUE -DSTP_DIR="${BASE}/stp-ziqiao-install")
     ;;
   Z3)
     echo "Z3"
@@ -134,8 +134,8 @@ cmake \
   -DGTEST_SRC_DIR=${GTEST_SRC_DIR} \
   -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
   ${KLEE_ASSERTS_OPTION[@]} \
-  -DENABLE_UNIT_TESTS=TRUE \
-  -DENABLE_SYSTEM_TESTS=TRUE \
+  -DENABLE_UNIT_TESTS=OFF \
+  -DENABLE_SYSTEM_TESTS=OFF \
   -DLIT_ARGS=\"-v\" \
   ${SANITIZER_CMAKE_C_COMPILER[@]} \
   ${SANITIZER_CMAKE_CXX_COMPILER[@]} \
