@@ -95,6 +95,12 @@ using namespace klee;
 
 
 namespace {
+ /*prepath option by ziqiao*/
+  static int pre_index=0;
+  cl::opt<std::string>
+  prepath("prepath",
+			  cl::desc("input predefined paths 101010..."),
+                  cl::init(""));
 
   /*** Test generation options ***/
 
@@ -997,8 +1003,25 @@ Executor::fork(ExecutionState &current, ref<Expr> condition, bool isInternal) {
     return StatePair(0, &current);
   } else {
     TimerStatIncrementer timer(stats::forkTime);
-    ExecutionState *falseState, *trueState = &current;
-
+	ExecutionState *falseState, *trueState = &current;
+	if(prepath[pre_index]=='0'){
+		if (!isInternal) {
+			if (pathWriter)
+			  trueState->pathOS << "0";
+		}
+		addConstraint(current,Expr::createIsZero(condition));
+		++pre_index;
+		return StatePair(0, &current);
+	}
+	if(prepath[pre_index]=='1'){
+		if (!isInternal) {
+			if (pathWriter)
+			  trueState->pathOS <<"1";
+		}
+		++pre_index;
+		addConstraint(current,condition);
+		return StatePair(&current,0);
+	}
     ++stats::forks;
 
     falseState = trueState->branch();
@@ -1055,9 +1078,14 @@ Executor::fork(ExecutionState &current, ref<Expr> condition, bool isInternal) {
     }
     if (symPathWriter) {
       falseState->symPathOS = symPathWriter->open(current.symPathOS);
-      if (!isInternal) {
-        trueState->symPathOS << "1";
-        falseState->symPathOS << "0";
+	  if (!isInternal) {
+		  Instruction * lastInst;
+		  const InstructionInfo &ii = getLastNonKleeInternalInstruction(current, &lastInst);
+		  std::stringstream msg;
+		  msg<<ii.file<<":"<<ii.line;
+		  trueState->symPathOS << "1 "<<msg.str().c_str();
+		  falseState->symPathOS << "0 "<<msg.str().c_str();
+		  klee_warning(msg.str().c_str());
       }
     }
 
