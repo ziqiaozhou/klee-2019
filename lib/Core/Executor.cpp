@@ -126,9 +126,6 @@ namespace {
                          "(default=off, i.e. one per (error,instruction) pair)"),
                 cl::cat(TestGenCat));
 
-
-
-
   cl::opt<bool>
   SimplifySymIndices("simplify-sym-indices",
                      cl::init(false),
@@ -1081,10 +1078,13 @@ Executor::fork(ExecutionState &current, ref<Expr> condition, bool isInternal) {
 	  if (!isInternal) {
 		  Instruction * lastInst;
 		  const InstructionInfo &ii = getLastNonKleeInternalInstruction(current, &lastInst);
-		  std::stringstream msg;
-		  msg<<ii.file<<":"<<ii.line;
-		  trueState->symPathOS << "1 "<<msg.str().c_str();
-		  falseState->symPathOS << "0 "<<msg.str().c_str();
+		  std::stringstream msg,msg2;
+		  msg<<"1"<<ii.file<<":"<<ii.line;
+		  trueState->symPathOS << msg.str().c_str()<<"\n";
+		  msg2<<"0"<<ii.file<<":"<<ii.line;
+		  falseState->symPathOS << msg2.str().c_str()<<"\n";
+		  falseState->symPathOS.flush();
+		  trueState->symPathOS.flush(); 
 		  klee_warning(msg.str().c_str());
       }
     }
@@ -3075,11 +3075,34 @@ void Executor::terminateState(ExecutionState &state) {
 }
 
 void Executor::terminateStateEarly(ExecutionState &state, 
-                                   const Twine &message) {
+                                   const Twine &messaget) {
   if (!OnlyOutputStatesCoveringNew || state.coveredNew ||
-      (AlwaysOutputSeeds && seedMap.count(&state)))
-    interpreterHandler->processTestCase(state, (message + "\n").str().c_str(),
-                                        "early");
+			  (AlwaysOutputSeeds && seedMap.count(&state)))
+	interpreterHandler->processTestCase(state, (messaget + "\n").str().c_str(),
+				"early");
+  std::string message = messaget.str();
+  static std::set< std::pair<Instruction*, std::string> > emittedErrors;
+  Instruction * lastInst;
+  const InstructionInfo &ii = getLastNonKleeInternalInstruction(state, &lastInst);
+  if (ii.file != "") {
+	  klee_message("ERROR: %s:%d: %s", ii.file.c_str(), ii.line, message.c_str());
+  } else {
+	  klee_message("ERROR: (location information missing) %s", message.c_str());
+  }
+  std::string MsgString;
+  llvm::raw_string_ostream msg(MsgString);
+  msg << "Error: " << message << "\n";
+  if (ii.file != "") {
+	  msg << "File: " << ii.file << "\n";
+	  msg << "Line: " << ii.line << "\n";
+	  msg << "assembly.ll line: " << ii.assemblyLine << "\n";
+  }
+  msg << "Stack: \n";
+  state.dumpStack(msg);
+  std::string suffix_buf;
+  suffix_buf = "early";
+  suffix_buf += ".err";
+  interpreterHandler->processTestCase(state, msg.str().c_str(), suffix_buf.c_str());
   terminateState(state);
 }
 
