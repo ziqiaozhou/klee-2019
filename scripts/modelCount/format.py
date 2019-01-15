@@ -18,16 +18,18 @@ def mergeAST(dirs,kleaver):
         for name in blacklist:
             pcfiles[d].remove(name)
     flist=[]
+    print(pcfiles)
     for d in pcfiles:
         for name in pcfiles[d]:
             flist.append(os.path.join(d,name+'.pc'))
-    cmd=kleaver+' -merge -outFormat=kquery '+' '.join(flist)
+    cmd=kleaver+' -merge -outFormat=kquery --pc-all-const-widths=true '+' '.join(flist)
     print(cmd)
     result = subprocess.check_output(cmd, shell=True)
-    print result
+    #print result
     f=open('result.pc','w')
     index=result.find('#merge finished')
     f.write(result[index:])
+    cmd='sed -i -e "s/v[0-9]*_\([a-zA-Z]*\)_[0-9]*/\1\g"'
     f.close()
 def AST2CVC(fnames,kleaver):
     for fname in fnames:
@@ -38,7 +40,7 @@ def AST2CVC(fnames,kleaver):
             f=open(fname,'w')
             f.write(c.replace('false)','false [] [offset])'))
         f.close()
-        cmd=kleaver+' -printCVC '+fname
+        cmd=kleaver+' -printCVC --pc-all-const-widths=true '+fname
         print (cmd)
         os.system(cmd)
 def STP2CNF(fnames,stp):
@@ -50,12 +52,11 @@ def AST2CNF(fnames,kleaver):
     for fname in fnames:
         f=open(fname,'r')
         c=f.read()
-        if True:
-            f.close()
-            f=open(fname,'w')
-            f.write(c.replace('false)','false [] [offset])'))
         f.close()
-        cmd=kleaver+' -evaluate '+fname
+        f=open(fname,'w')
+        f.write(c.replace('false)','false [] [secret])'))
+        f.close()
+        cmd=kleaver+' -evaluate --pc-all-const-widths=true '+fname
         print (cmd)
         os.system(cmd)
 
