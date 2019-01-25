@@ -848,7 +848,7 @@ void Executor::branch(ExecutionState &state,
     if (result[i])
       addConstraint(*result[i], conditions[i]);
 }
-
+static int nfork=0;
 Executor::StatePair 
 Executor::fork(ExecutionState &current, ref<Expr> condition, bool isInternal) {
   Solver::Validity res;
@@ -1001,6 +1001,8 @@ Executor::fork(ExecutionState &current, ref<Expr> condition, bool isInternal) {
   } else {
     TimerStatIncrementer timer(stats::forkTime);
 	ExecutionState *falseState, *trueState = &current;
+	klee_warning("fork time=%d\n",nfork);
+	nfork++;
 	if(prepath[pre_index]=='0'){
 		if (!isInternal) {
 			if (pathWriter)
